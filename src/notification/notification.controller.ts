@@ -8,16 +8,12 @@ import {
   Get,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { CreateSystemNotificationDto } from './dto/create-systemnotification.dto';
-import { CreateTeamInvNotificationDto } from './dto/create-team_inv_notification.dto';
-import { NotificationFacade } from './notification.facade';
+import { CreateSystemNotificationDto } from './dto/create-system-notification.dto';
+import { CreateTeamInvNotificationDto } from './dto/create-team-notification.dto';
 
 @Controller('notification')
 export class NotificationController {
-  constructor(
-    private readonly notificationService: NotificationService,
-    private readonly notificationFacade: NotificationFacade,
-  ) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   @Post('/system')
   async createSysNotification(
@@ -39,7 +35,11 @@ export class NotificationController {
 
   @Get(':id')
   async findNotificationById(@Param('id') id: number) {
-    return await this.notificationFacade.findById(id);
+    return await this.notificationService.findById(id);
+  }
+  @Get('user/:userid')
+  async findNotificationByFromUser(@Param('userid') userid: number) {
+    return await this.notificationService.findByFromUser(userid);
   }
 
   @Patch(':id')

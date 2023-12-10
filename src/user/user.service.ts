@@ -3,7 +3,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotificationDto } from 'src/notification/dto/notification.dto';
 
 @Injectable()
 export class UserService {
@@ -20,8 +19,7 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    if (id == undefined)
-    return null
+    if (id == undefined) return null;
 
     return await this.userRepository.findOneBy({
       id: id,
@@ -29,27 +27,27 @@ export class UserService {
   }
 
   async findAllNotifications(id: number) {
-    const user = await this.findUser(id)
+    const user = await this.findUser(id);
 
-    if (user != null) return user.notifications.map((notificaiton) => new NotificationDto(notificaiton));
+    if (user != null) return user.notifications;
     else throw new BadRequestException('User not found');
   }
 
   async findSystemNotifications(id: number) {
-    const user = await this.findUser(id)
+    const user = await this.findUser(id);
     if (user != null)
       return user.notifications.filter(
         (notification) => notification.type == 'system',
-      ).map(notification => new NotificationDto(notification));
+      );
     else throw new BadRequestException('User not found');
   }
 
   async findTeamInvNotifications(id: number) {
-    const user = await this.findUser(id)
+    const user = await this.findUser(id);
     if (user != null)
       return user.notifications.filter(
         (notification) => notification.type == 'team_invitation',
-      ).map(notification => new NotificationDto(notification));
+      );
     else throw new BadRequestException('User not found');
   }
 

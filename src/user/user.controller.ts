@@ -11,6 +11,11 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Get(':id')
+  async get(@Param('id') id: string) {
+    return await this.userService.findOne(+id);
+  }
+
   @Get(':id/notifications')
   async findAllNotifications(@Param('id') id: string) {
     return await this.userService.findAllNotifications(+id);

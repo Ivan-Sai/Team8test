@@ -6,8 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
-import { INotificationTypeData } from './NotificationTypes';
+import { NotificationTypeData } from '../types/NotificationTypes';
 import { NotificationTypesEnum } from '../Enums/notificationTypesEnum';
+import { Transform } from 'class-transformer';
 
 @Entity({ name: 'notification' })
 export class NotificationEntity {
@@ -17,7 +18,7 @@ export class NotificationEntity {
   @ManyToOne(() => UserEntity, (user) => user.notifications)
   receiver: UserEntity;
 
-  @Column({ type: 'bool', default: false })
+  @Column({ type: Boolean, default: false })
   read: boolean;
 
   @CreateDateColumn()
@@ -27,5 +28,11 @@ export class NotificationEntity {
   type: NotificationTypesEnum;
 
   @Column({ type: 'jsonb' })
-  data: INotificationTypeData;
+  @Transform(({ value }) => {
+    if (value && value.fromUser && value.fromUser.password) {
+      delete value.fromUser.password;
+    }
+    return value;
+  })
+  data: NotificationTypeData;
 }

@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateSystemNotificationDto } from './dto/create-systemnotification.dto';
+import { CreateSystemNotificationDto } from './dto/create-system-notification.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationEntity } from './entities/notification.entity';
 import { UserService } from '../user/user.service';
-import { CreateTeamInvNotificationDto } from './dto/create-team_inv_notification.dto';
+import { CreateTeamInvNotificationDto } from './dto/create-team-notification.dto';
 import { NotificationTypesEnum } from './Enums/notificationTypesEnum';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class NotificationService {
@@ -21,7 +22,7 @@ export class NotificationService {
     const receiver = await this.userService.findOne(
       createSystemNotificationDto.receiverId,
     );
-    if (receiver != null && receiver != undefined) {
+    if (receiver != null) {
       notification.receiver = receiver;
     } else throw new BadRequestException('Receiver not found');
     notification.type = NotificationTypesEnum.system;
@@ -38,12 +39,12 @@ export class NotificationService {
     const receiver = await this.userService.findOne(
       createTeam_inv_notificationDto.receiverId,
     );
-    if (receiver != null && receiver != undefined) {
+    if (receiver != null) {
       notification.receiver = receiver;
     } else throw new BadRequestException('Receiver not found');
 
-    const from_user = await this.userService.findOne(
-      createTeam_inv_notificationDto.from_user,
+    const from_user = classToPlain(
+      this.userService.findOne(createTeam_inv_notificationDto.from_user),
     );
     if (from_user != null) {
       notification.type = NotificationTypesEnum.team_invitation;
@@ -72,12 +73,23 @@ export class NotificationService {
     return await this.findById(id);
   }
 
-  private async findById(id: number) {
+  public async findById(id: number) {
     const notification = await this.notificationRepository.findOne({
       where: { id: id },
       relations: ['receiver'],
     });
+
     if (notification != null) return notification;
     else throw new BadRequestException('Notification not found');
+  }
+
+  async findByFromUser(userId: number) {
+    return await this.notificationRepository
+      .createQueryBuilder('notification')
+      .leftJoinAndSelect('notification.receiver', 'receiver')
+      .where("notification.data -> 'fromUser' -> 'id' = :userId", {
+        userId: userId,
+      })
+      .getMany();
   }
 }

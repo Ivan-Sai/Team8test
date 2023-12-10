@@ -5,6 +5,8 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationModule } from './notification/notification.module';
+import { TestController } from './test/test.controller';
+import { TestresModule } from './testres/testres.module';
 
 
 @Module({
@@ -26,8 +28,9 @@ import { NotificationModule } from './notification/notification.module';
       inject: [ConfigService],
     }),
     NotificationModule,
+    TestresModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TestController],
   providers: [AppService],
 })
 export class AppModule {}
